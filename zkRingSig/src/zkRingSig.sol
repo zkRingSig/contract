@@ -31,6 +31,8 @@ contract zkRingSig is MerkleTree, ReentrancyGuard {
     mapping(bytes32 => bool) public commitments;
     mapping(bytes32 => bool) public nullilfierHashes;
 
+    bytes32[] public commitmentsList;
+
     bytes32[2] public supervisorPublickeyStart = [bytes32(0x1a6ef912793139a54cbbe77ceff5acce3140b659744d1c516aad7682ba979199), bytes32(0x198f3a926b833efd0056926724c072fdcfb1ebb84e77e60daa14a1484070dd07)];
     bytes32[2] public supervisorPublickeyEnd = [bytes32(0x1f76b93712e7dcb087468c1469e1f8425d17d265d2f870c9c22d9cb1399e5986), bytes32(0x2f7843eb4df4334d2f14a3a844c4430bee0ec46cfec755fcf02707f3a424f5fa)];
     
@@ -81,6 +83,7 @@ contract zkRingSig is MerkleTree, ReentrancyGuard {
 
         uint32 leafIndex = insert(kG_Hash); // 2^20
         commitments[kG_Hash] = true;
+        commitmentsList.push(kG_Hash);  // 
         emit Deposit(kG_Hash, leafIndex);
     }
 
@@ -131,5 +134,15 @@ contract zkRingSig is MerkleTree, ReentrancyGuard {
         (bool success, ) = payable(recipient).call{value: denomination}("");
         // require(success, "pay failed");
         emit Withdraw(recipient, kH_Hash);
+    }
+
+    // for test only
+    function getCommitments() public view returns(bytes32[] memory){
+        uint _num = commitmentsList.length;
+        bytes32[] memory _list = new bytes32[](_num);
+        for(uint i=0; i<_num; i++){
+            _list[i] = commitmentsList[i];
+        }
+        return _list;
     }
 }
